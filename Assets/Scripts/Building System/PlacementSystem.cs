@@ -1,13 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class PlacementSystem : Singleton<PlacementSystem>
 {
     [SerializeField] GameObject mouseIndicator;
-    [SerializeField]public Grid subGrid;
+    [SerializeField] public Grid subGrid;
     [SerializeField] private TileBase whiteTile;
     public Grid mainGrid;
     //public Tilemap tilemap;
@@ -17,14 +14,14 @@ public class PlacementSystem : Singleton<PlacementSystem>
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
         mousePosition = InputManager.Instance.GetSelectedMapPosition();
-        
+
         mouseIndicator.transform.position = mousePosition;
 
         if (Input.GetMouseButtonDown(0))
@@ -68,7 +65,7 @@ public class PlacementSystem : Singleton<PlacementSystem>
             SetPosition(initalPosition);
             //LET GO
             objectToPlace = null;
-            
+
             Debug.Log("Let Go");
         }
 
