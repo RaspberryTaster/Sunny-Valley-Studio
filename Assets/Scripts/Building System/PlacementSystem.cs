@@ -79,6 +79,8 @@ public class PlacementSystem : Singleton<PlacementSystem>
 
     private void SetPosition(Vector3 pos)
     {
+        //check if position is out of bounds, if its out of bounds do not move it there.
+
         Vector3Int gridPosition = subGrid.WorldToCell(pos);
         objectToPlace.transform.position = subGrid.CellToWorld(gridPosition);
     }

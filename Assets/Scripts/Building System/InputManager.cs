@@ -17,7 +17,10 @@ public class InputManager : Singleton<InputManager>
     public Vector3 GetSelectedMapPosition()
     {
         Ray ray = sceneCamera.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, placementLayerMask))
+        bool raycast = Physics.Raycast(ray, out RaycastHit hit);
+        bool insideLayer = placementLayerMask.Contains(hit.transform.gameObject.layer);
+        
+        if (raycast && insideLayer)
         {
             lastPosition = hit.point;
             Debug.Log(hit.transform.gameObject);
