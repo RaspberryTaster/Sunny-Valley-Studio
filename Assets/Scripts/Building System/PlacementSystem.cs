@@ -8,7 +8,7 @@ public class PlacementSystem : Singleton<PlacementSystem>
     [SerializeField] private TileBase whiteTile;
     public Grid mainGrid;
     //public Tilemap tilemap;
-    private PlaceableObject objectToPlace;
+    public PlaceableObject objectToPlace;
     private Vector3 initalPosition;
     private Vector3 mousePosition;
     // Start is called before the first frame update
@@ -39,8 +39,7 @@ public class PlacementSystem : Singleton<PlacementSystem>
 
 
                     Debug.Log(hit.transform.gameObject);
-                    objectToPlace = hit.transform.gameObject.GetComponent<PlaceableObject>();
-                    if (objectToPlace != null)
+                    if (hit.transform.gameObject.TryGetComponent<PlaceableObject>(out objectToPlace))
                     {
                         initalPosition = objectToPlace.transform.position;
                     }
@@ -62,6 +61,7 @@ public class PlacementSystem : Singleton<PlacementSystem>
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+
             SetPosition(initalPosition);
             //LET GO
             objectToPlace = null;
