@@ -5,7 +5,6 @@ public class PlacementSystem : Singleton<PlacementSystem>
 {
     [SerializeField] GameObject mouseIndicator;
     [SerializeField] public Grid subGrid;
-    [SerializeField] private TileBase whiteTile;
     public Grid mainGrid;
     //public Tilemap tilemap;
     public PlaceableObject objectToPlace;
@@ -29,7 +28,8 @@ public class PlacementSystem : Singleton<PlacementSystem>
 
             if (objectToPlace != null)
             {
-                objectToPlace = null;
+                if (!objectToPlace.CanBePlaced) return;
+                objectToPlace.Drop(this);
             }
             else
             {
@@ -39,8 +39,9 @@ public class PlacementSystem : Singleton<PlacementSystem>
 
 
                     Debug.Log(hit.transform.gameObject);
-                    if (hit.transform.gameObject.TryGetComponent<PlaceableObject>(out objectToPlace))
+                    if (hit.transform.gameObject.TryGetComponent(out objectToPlace))
                     {
+                        objectToPlace.Move();
                         initalPosition = objectToPlace.transform.position;
                     }
                 }
@@ -62,11 +63,9 @@ public class PlacementSystem : Singleton<PlacementSystem>
         if (Input.GetKeyDown(KeyCode.Escape))
         {
 
-            SetPosition(initalPosition);
-            //LET GO
-            objectToPlace = null;
 
-            Debug.Log("Let Go");
+
+            objectToPlace.Drop(initalPosition,this);
         }
 
 
@@ -77,7 +76,7 @@ public class PlacementSystem : Singleton<PlacementSystem>
         SetPosition(mousePosition);
     }
 
-    private void SetPosition(Vector3 pos)
+    public void SetPosition(Vector3 pos)
     {
         //check if position is out of bounds, if its out of bounds do not move it there.
 

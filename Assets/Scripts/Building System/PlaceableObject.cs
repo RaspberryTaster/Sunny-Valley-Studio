@@ -8,7 +8,20 @@ public class PlaceableObject : MonoBehaviour
     public bool Placed { get; private set; }
     public Vector3Int Size { get; private set; }
     private Vector3[] Vertices;
-    public bool CanBePlaced;
+    public bool CanBePlaced
+    {
+        get
+        {
+            bool isIntersecting = intersectingObjects.Count > 0;
+            
+            return !isIntersecting;
+            
+        }
+    }
+
+    List<PlaceableObject> intersectingObjects = new();
+    [SerializeField]private ObjectGrid objectGrid;
+
 
     private void GetColliderVertexPositionsLocal()
     {
@@ -33,9 +46,41 @@ public class PlaceableObject : MonoBehaviour
         Size = new Vector3Int(Mathf.Abs((vertices[0] - vertices[1]).x), Mathf.Abs((vertices[0] - vertices[3]).y), 1);
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.transform.gameObject.TryGetComponent(out PlaceableObject intersecting))
+        {
+            intersectingObjects.Add(intersecting);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.transform.gameObject.TryGetComponent(out PlaceableObject intersecting))
+        {
+            intersectingObjects.Remove(intersecting);
+        }
+    }
     private Vector3 GetStartPosition()
     {
         return transform.TransformPoint(Vertices[0]);
+    }
+
+    public void Move()
+    {
+        objectGrid.gameObject.SetActive(true);
+    }
+    public void Drop(PlacementSystem placementSystem)
+    {
+        placementSystem.objectToPlace = null;
+        objectGrid.gameObject.SetActive(false);
+    }
+
+    public void Drop(Vector3 position, PlacementSystem placementSystem)
+    {
+        placementSystem.SetPosition(position);
+        //LET GO
+        Drop(placementSystem);
     }
 
     private static TileBase[] GetTilesBlock(BoundsInt area, Tilemap tilemap)
@@ -54,8 +99,16 @@ public class PlaceableObject : MonoBehaviour
 
     private void Start()
     {
+        objectGrid.gameObject.SetActive(false);
         GetColliderVertexPositionsLocal();
         CalculateSizeInCells();
+        objectGrid.placeableObject = this;
+
+    }
+
+    private void Update()
+    {
+      
 
     }
 
