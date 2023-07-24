@@ -4,8 +4,8 @@ using UnityEngine.Tilemaps;
 public class PlacementSystem : Singleton<PlacementSystem>
 {
     [SerializeField] GameObject mouseIndicator;
-    [SerializeField] public Grid subGrid;
-    public Grid mainGrid;
+    [SerializeField] public Tilemap subGrid;
+    public Tilemap mainGrid;
     //public Tilemap tilemap;
     public PlaceableObject objectToPlace;
     private Vector3 initalPosition;
@@ -81,7 +81,7 @@ public class PlacementSystem : Singleton<PlacementSystem>
         //check if position is out of bounds, if its out of bounds do not move it there.
 
         Vector3Int gridPosition = subGrid.WorldToCell(pos);
-        objectToPlace.transform.position = subGrid.CellToWorld(gridPosition);
+        objectToPlace.transform.position = subGrid.GetCellCenterWorld(gridPosition);
     }
 
 }

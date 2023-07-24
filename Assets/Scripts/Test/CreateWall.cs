@@ -1,24 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using static UnityEditor.PlayerSettings;
 
 public class CreateWall : MonoBehaviour
 {
     public bool creating;
-    public GameObject polePrefab;
-    public GameObject wallPrefab;
-    public Grid wallGrid;
-    private GameObject lastPole;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public Tilemap wallGrid;
+    public GameObject mouseIndicator;
 
     // Update is called once per frame
     void Update()
     {
+
+
+        mouseIndicator.transform.position = Position(InputManager.Instance.GetSelectedMapPosition());
+
         GetInput();
     }
 
@@ -36,7 +34,8 @@ public class CreateWall : MonoBehaviour
         {
             if (creating)
             {
-                UpdateFence();
+                WallPlacement.Instance.SetEndPosition(Position(InputManager.Instance.GetSelectedMapPosition()));
+                WallPlacement.Instance.UpdateWall();
             }
         }
     }
@@ -44,26 +43,20 @@ public class CreateWall : MonoBehaviour
     void StartFence()
     {
         creating = true;
-        GameObject startPole = Instantiate(polePrefab, Position(InputManager.Instance.GetSelectedMapPosition()), Quaternion.identity);
-        lastPole = startPole;
+        //GameObject startPole = Instantiate(polePrefab, Position(InputManager.Instance.GetSelectedMapPosition()), Quaternion.identity);
+        //lastPole = startPole;
+        WallPlacement.Instance.SetPosition(Position(InputManager.Instance.GetSelectedMapPosition()), Position(InputManager.Instance.GetSelectedMapPosition()));
     }
 
     void SetFence()
     {
         creating = false;   
-    }
-
-    void UpdateFence()
-    {
-        Vector3 current = Position(InputManager.Instance.GetSelectedMapPosition());
-        if(!current.Equals(lastPole.transform.position)) { 
-            
-        }
+        WallPlacement.Instance.DetatchWalls();
     }
 
     public Vector3 Position(Vector3 position)
     {
         Vector3Int gridPosition = wallGrid.WorldToCell(position);
-        return wallGrid.CellToWorld(gridPosition);
+        return wallGrid.GetCellCenterWorld(gridPosition);
     }
 }

@@ -20,7 +20,7 @@ public class InputManager : Singleton<InputManager>
         if (Physics.Raycast(ray, out RaycastHit hit,float.MaxValue, placementLayerMask.value))
         {
             lastPosition = hit.point;
-            Debug.Log(hit.transform.gameObject);
+            //Debug.Log(hit.transform.gameObject);
         }
 
         return lastPosition;
