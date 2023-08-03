@@ -5,7 +5,6 @@ public class PlacementSystem : Singleton<PlacementSystem>
 {
     [SerializeField] GameObject mouseIndicator;
     [SerializeField] public Tilemap subGrid;
-    public Tilemap mainGrid;
     //public Tilemap tilemap;
     public PlaceableObject objectToPlace;
     private Vector3 initalPosition;
@@ -21,7 +20,8 @@ public class PlacementSystem : Singleton<PlacementSystem>
     {
         mousePosition = InputManager.Instance.GetSelectedMapPosition();
 
-        mouseIndicator.transform.position = mousePosition;
+        if(mouseIndicator!= null)
+            mouseIndicator.transform.position = mousePosition;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -29,7 +29,7 @@ public class PlacementSystem : Singleton<PlacementSystem>
             if (objectToPlace != null)
             {
                 if (!objectToPlace.CanBePlaced) return;
-                objectToPlace.Drop(this);
+                //objectToPlace.Drop(this);
             }
             else
             {
@@ -65,7 +65,7 @@ public class PlacementSystem : Singleton<PlacementSystem>
 
 
 
-            objectToPlace.Drop(initalPosition,this);
+            //objectToPlace.Drop(initalPosition,this);
         }
 
 

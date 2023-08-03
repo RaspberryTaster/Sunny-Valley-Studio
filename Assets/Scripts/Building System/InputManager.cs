@@ -25,4 +25,16 @@ public class InputManager : Singleton<InputManager>
 
         return lastPosition;
     }
+
+    public bool MouseOnGridLayer()
+    {
+        Ray ray = sceneCamera.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, float.MaxValue, placementLayerMask.value))
+        {
+            return true;
+        }
+
+        return false;
+    }
 }

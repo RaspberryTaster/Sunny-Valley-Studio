@@ -1,9 +1,11 @@
+using Assets.Scripts.Building_System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class PlaceableObject : MonoBehaviour
+public class PlaceableObject : MonoBehaviour,ICollidable
 {
     public bool Placed { get; private set; }
     public Vector3Int Size { get; private set; }
@@ -19,9 +21,9 @@ public class PlaceableObject : MonoBehaviour
         }
     }
 
-    List<PlaceableObject> intersectingObjects = new();
+    List<ICollidable> intersectingObjects = new();
     [SerializeField]private ObjectGrid objectGrid;
-
+    [SerializeField] public NavMeshSurface currentFloor;
 
     private void GetColliderVertexPositionsLocal()
     {
@@ -40,7 +42,7 @@ public class PlaceableObject : MonoBehaviour
         for (int i = 0; i < Vertices.Length; i++)
         {
             Vector3 worldPos = transform.TransformPoint(Vertices[i]);
-            vertices[i] = PlacementSystem.Instance.subGrid.WorldToCell(worldPos);
+            vertices[i] = PlayerController.Instance.objectPlacementGrid.WorldToCell(worldPos);
         }
 
         Size = new Vector3Int(Mathf.Abs((vertices[0] - vertices[1]).x), Mathf.Abs((vertices[0] - vertices[3]).y), 1);
@@ -48,7 +50,7 @@ public class PlaceableObject : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.transform.gameObject.TryGetComponent(out PlaceableObject intersecting))
+        if (other.transform.gameObject.TryGetComponent(out ICollidable intersecting))
         {
             intersectingObjects.Add(intersecting);
         }
@@ -56,7 +58,7 @@ public class PlaceableObject : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.transform.gameObject.TryGetComponent(out PlaceableObject intersecting))
+        if (other.transform.gameObject.TryGetComponent(out ICollidable intersecting))
         {
             intersectingObjects.Remove(intersecting);
         }
@@ -70,13 +72,16 @@ public class PlaceableObject : MonoBehaviour
     {
         objectGrid.gameObject.SetActive(true);
     }
-    public void Drop(PlacementSystem placementSystem)
+    public void Drop(ObjectPlacementState placementSystem)
     {
+        //Debug.Log("Drop");
         placementSystem.objectToPlace = null;
         objectGrid.gameObject.SetActive(false);
+        currentFloor?.BuildNavMesh();
+
     }
 
-    public void Drop(Vector3 position, PlacementSystem placementSystem)
+    public void Drop(Vector3 position, ObjectPlacementState placementSystem)
     {
         placementSystem.SetPosition(position);
         //LET GO
@@ -97,8 +102,12 @@ public class PlaceableObject : MonoBehaviour
         return array;
     }
 
-    private void Start()
+    private void Awake()
     {
+
+        Floor currentFloor = FloorManager.Instance.GetFloorByHeight(transform.position.y);
+        currentFloor.Subscribe(this);
+
         objectGrid.gameObject.SetActive(false);
         GetColliderVertexPositionsLocal();
         CalculateSizeInCells();
