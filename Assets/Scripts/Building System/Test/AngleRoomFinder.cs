@@ -24,8 +24,8 @@ public class AngleRoomFinder : MonoBehaviour
     {
         if (a != null && b != null)
         {
-            Vector3 bpos = (b.farPoint.position);
-            Gizmos.DrawSphere(bpos,.5f);
+            //Vector3 bpos = (b.farPoint.position);
+            //Gizmos.DrawSphere(bpos,.5f);
         }
     }
 }

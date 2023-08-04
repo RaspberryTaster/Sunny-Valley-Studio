@@ -2,61 +2,66 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using static UnityEditor.PlayerSettings;
 
-public class CreateWall : MonoBehaviour
+public class ObjectPlacer : MonoBehaviour
 {
-    public bool creating;
-    public Tilemap wallGrid;
-    public GameObject mouseIndicator;
+    public Tilemap placementGrid;
+    public Renderer boundsPlane;
+    public GameObject placementPrefab;
+    public GameObject floodPrefab;
 
-    // Update is called once per frame
-    void Update()
+    private Camera mainCamera;
+    private Dictionary<GameObject, Vector3Int> placedObjects = new Dictionary<GameObject, Vector3Int>();
+
+    private void Start()
     {
-
-
-        mouseIndicator.transform.position = Position(InputManager.Instance.GetSelectedMapPosition());
-
-        GetInput();
+        mainCamera = Camera.main;
     }
 
-    private void GetInput()
+    private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            StartFence();
-        }
-        else if (Input.GetMouseButtonUp(0))
-        {
-            SetFence();
-        }
-        else
-        {
-            if (creating)
+            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
             {
-                WallPlacementManager.Instance.SetEndPosition(Position(InputManager.Instance.GetSelectedMapPosition()));
-                WallPlacementManager.Instance.UpdateWall();
+                Vector3 placementPosition = Position(hit.point);
+
+                // Check if placement position is within bounds
+                if (IsWithinBoundsXZ(placementPosition))
+                {
+                    GameObject placedObject = PlacePrefab(placementPosition);
+                    if (placedObject != null)
+                    {
+                        Vector3Int gridPosition = placementGrid.WorldToCell(placementPosition);
+                        placedObjects.Add(placedObject, gridPosition);
+                    }
+                }
             }
         }
     }
 
-    void StartFence()
-    {
-        creating = true;
-        //GameObject startPole = Instantiate(polePrefab, Position(InputManager.Instance.GetSelectedMapPosition()), Quaternion.identity);
-        //lastPole = startPole;
-        WallPlacementManager.Instance.SetPosition(Position(InputManager.Instance.GetSelectedMapPosition()), Position(InputManager.Instance.GetSelectedMapPosition()));
-    }
-
-    void SetFence()
-    {
-        creating = false;   
-        WallPlacementManager.Instance.DetatchWalls();
-    }
-
     public Vector3 Position(Vector3 position)
     {
-        Vector3Int gridPosition = wallGrid.WorldToCell(position);
-        return wallGrid.GetCellCenterWorld(gridPosition);
+        Vector3Int gridPosition = placementGrid.WorldToCell(position);
+        return placementGrid.GetCellCenterWorld(gridPosition);
+    }
+
+    private bool IsWithinBoundsXZ(Vector3 position)
+    {
+        Bounds bounds = boundsPlane.bounds;
+
+        bool withinXBounds = position.x >= bounds.min.x && position.x <= bounds.max.x;
+        bool withinZBounds = position.z >= bounds.min.z && position.z <= bounds.max.z;
+
+        return withinXBounds && withinZBounds;
+    }
+
+    private GameObject PlacePrefab(Vector3 position)
+    {
+        GameObject prefabInstance = Instantiate(placementPrefab, position, Quaternion.identity);
+        return prefabInstance;
     }
 }

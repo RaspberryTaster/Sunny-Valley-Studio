@@ -5,8 +5,8 @@ public class WallPlacementManager : Singleton<WallPlacementManager>
 {
     private Vector3 startPoint;
     private Vector3 endPoint;
-    public GameObject horizontalWallPrefab;
-    public GameObject diagonalWallPrefab;
+    public Wall horizontalWallPrefab;
+    public Wall diagonalWallPrefab;
 
     private GameObject wallsParent; // Parent GameObject to hold the wall cubes
 
@@ -30,14 +30,14 @@ public class WallPlacementManager : Singleton<WallPlacementManager>
     {
         if (startPoint != previousStartPoint || endPoint != previousEndPoint)
         {
-            DeleteCubes();
+            DeleteWalls();
             SpawnWalls();
             previousStartPoint = startPoint;
             previousEndPoint = endPoint;
         }
     }
 
-    private void DeleteCubes()
+    private void DeleteWalls()
     {
         // Destroy the parent GameObject (walls) and all its children (cubes)
         Destroy(wallsParent);
@@ -108,16 +108,17 @@ public class WallPlacementManager : Singleton<WallPlacementManager>
         }
     }
 
-    private void Spawn(GameObject wall, Vector3 direction, float spacing, int i)
+    private void Spawn(Wall wall, Vector3 direction, float spacing, int i)
     {
         Vector3 spawnPosition = startPoint + direction * (spacing * i);
-        GameObject newCube = Instantiate(wall, spawnPosition, Quaternion.identity);
-        newCube.transform.forward = direction;
+        Wall newWall = Instantiate(wall, spawnPosition, Quaternion.identity);
+        newWall.transform.forward = direction;
+        newWall.spacing = spacing;
         // Optionally, you can parent the cubes to the wallsParent for organization.
-        newCube.transform.parent = wallsParent.transform;
+        newWall.transform.parent = wallsParent.transform;
         // Align the cubes along the line direction
     }
-
+                
     // Calculate the spacing based on the angle between start and end points
     private float GetSpacing()
     {

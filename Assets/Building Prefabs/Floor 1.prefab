@@ -141,7 +141,7 @@ Transform:
   m_Children:
   - {fileID: 1983743799}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3634807337282020181
 MeshFilter:
@@ -260,4 +260,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   navMeshSurface: {fileID: 3634807337282020200}
   objectsOnFloor: []
-  floorManager: {fileID: 0}
+  rooms: []

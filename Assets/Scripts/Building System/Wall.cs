@@ -15,11 +15,9 @@ public enum CeilingDirection
 public class Wall : MonoBehaviour, ICollidable
 {
     public CeilingDirection ceilingDirection;
-    public GameObject wallNeighbourTransform;
-
+    public float spacing;
     public GameObject FrontCeiling;
     public GameObject BackCeiling;
-    public Transform farPoint;
     public GameObject wallObject;
     [SerializeField] private float distance = 0.5f; // Distance of the sphere gizmo from the object
 
@@ -54,19 +52,8 @@ public class Wall : MonoBehaviour, ICollidable
 
     private void OnDrawGizmos()
     {
-
-        if (wallNeighbourTransform == null) return;
-        // Calculate the position of the gizmo using transform.forward and distance
-        Vector3 gizmoPosition = wallNeighbourTransform.transform.position + wallNeighbourTransform.transform.forward * distance;
-
-        // Draw a sphere gizmo at the calculated position
-        Gizmos.color = Color.red; // You can change the color if you want
-        Gizmos.DrawSphere(gizmoPosition, 0.1f); // Adjust the size of the sphere if needed
-
-        gizmoPosition = wallNeighbourTransform.transform.position +  -wallNeighbourTransform.transform.forward * distance;
-
-        Gizmos.color = Color.blue; // You can change the color if you want
-        Gizmos.DrawSphere(gizmoPosition, 0.1f); // Adjust the size of the sphere if needed
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawSphere(transform.forward*spacing ,0.1f);
     }
 
     private void OnTriggerEnter(Collider other)
