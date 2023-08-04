@@ -8,7 +8,6 @@ public class Floor : MonoBehaviour
 {
     public NavMeshSurface navMeshSurface;
     public List<GameObject> objectsOnFloor = new List<GameObject>();
-    public FloorManager floorManager;
 
     private List<PlaceableObject> placeableObjects = new List<PlaceableObject>();
     public Room[] rooms;

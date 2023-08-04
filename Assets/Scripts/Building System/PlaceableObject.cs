@@ -102,7 +102,7 @@ public class PlaceableObject : MonoBehaviour,ICollidable
         return array;
     }
 
-    private void Awake()
+    private void Start()
     {
 
         Floor currentFloor = FloorManager.Instance.GetFloorByHeight(transform.position.y);
