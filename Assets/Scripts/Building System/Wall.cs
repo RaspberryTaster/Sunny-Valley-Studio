@@ -15,7 +15,7 @@ public enum CeilingDirection
 public class Wall : MonoBehaviour, ICollidable
 {
     public CeilingDirection ceilingDirection;
-    public float spacing;
+    public Transform endPoint;
     public GameObject FrontCeiling;
     public GameObject BackCeiling;
     public GameObject wallObject;
@@ -48,14 +48,20 @@ public class Wall : MonoBehaviour, ICollidable
         }
     }
 
-
-
-    private void OnDrawGizmos()
+    private void OnEnable()
     {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawSphere(transform.forward*spacing ,0.1f);
+        
     }
 
+    private void OnDestroy()
+    {
+        FloodFillRoom.Instance.RemoveWall(this);
+    }
+
+    public void SetPos()
+    {
+        FloodFillRoom.Instance.AddWall(this);
+    }
     private void OnTriggerEnter(Collider other)
     {
         if(!other.TryGetComponent<Wall>(out var w) || connectedWalls.Contains(w)) return;

@@ -67,5 +67,8 @@ namespace Assets.Scripts.Extensions
         {
             return angle % 90 == 0;
         }
+
+
+
     }
 }

@@ -65,7 +65,7 @@ namespace Assets.Scripts.Building_System.Test
 
             }
         }   
-
+ 
 
         private void OnDrawGizmos()
         {

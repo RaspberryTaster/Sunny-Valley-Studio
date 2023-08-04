@@ -1,3 +1,4 @@
+using Assets.Scripts.Building_System.Test;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,13 +8,13 @@ using UnityEngine.Tilemaps;
 public class FloodFillRoom : Singleton<FloodFillRoom>
 {
     public Tilemap wallPlacementGrid;
+    public Tilemap groundGrid;
     public Renderer boundsPlane;
-    public GameObject placementPrefab;
     public GameObject floodPrefab;
 
     private Camera mainCamera;
-    private Dictionary<GameObject, Vector3> placedObjects = new Dictionary<GameObject, Vector3>();
-
+    public List<Vector3> wallPositions;
+    private Dictionary<Vector3, List<Wall>> placedWall = new Dictionary<Vector3, List<Wall>>();
     private void Start()
     {
         mainCamera = Camera.main;
@@ -21,43 +22,62 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(1))
         {
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 Vector3 placementPosition = Position(hit.point);
 
                 // Check if placement position is within bounds
                 if (IsWithinBoundsXZ(placementPosition))
                 {
-                    GameObject placedObject = PlacePrefab(placementPosition);
-                    if (placedObject != null)
-                    {
-                        Vector3Int gridPosition = wallPlacementGrid.WorldToCell(placementPosition);
-                        placedObjects.Add(placedObject, placementPosition);
-                    }
+                    StartFloodFill(placementPosition);
                 }
             }
+
         }
-        else if (Input.GetMouseButtonDown(1))
+    }
+
+
+    public void AddWall(Wall w)
+    {
+        Vector3 key = Position(w.transform.position);
+        Vector3 key1 = Position(w.endPoint.position);
+        wallPositions.Add(key);
+        wallPositions.Add(key1);
+
+        // Add the wall to the placedWall dictionary
+        if (!placedWall.ContainsKey(key))
         {
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
+            placedWall[key] = new List<Wall>();
+        }
+        placedWall[key].Add(w);
 
-            if (Physics.Raycast(ray, out hit))
-            {
-                Vector3 placementPosition = Position(hit.point);
+        if (!placedWall.ContainsKey(key1))
+        {
+            placedWall[key1] = new List<Wall>();
+        }
+        placedWall[key1].Add(w);
+    }
 
-                // Check if placement position is within bounds
-                if (IsWithinBoundsXZ(placementPosition))
-                {
-                    FloodFill(placementPosition);
-                }
-            }
+    public void RemoveWall(Wall w)
+    {
+        Vector3 key = Position(w.transform.position);
+        Vector3 key1 = Position(w.endPoint.position);
+        wallPositions.Remove(key);
+        wallPositions.Remove(key1);
 
+        // Remove the wall from the placedWall dictionary
+        if (placedWall.ContainsKey(key))
+        {
+            placedWall[key].Remove(w);
+        }
+
+        if (placedWall.ContainsKey(key1))
+        {
+            placedWall[key1].Remove(w);
         }
     }
 
@@ -77,42 +97,54 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
         return withinXBounds && withinZBounds;
     }
 
-    private GameObject PlacePrefab(Vector3 position)
+    private void StartFloodFill(Vector3 position)
     {
-        GameObject prefabInstance = Instantiate(placementPrefab, position, Quaternion.identity);
-        return prefabInstance;
+        
+        FloodFill(position);
+        //StartFloodFill(position);
     }
 
-    private void FloodFill(Vector3 position)
+     
+    private List<Vector3> FloodFill(Vector3 initialPosition)
     {
-        RecursiveFloodFill(position);
+        HashSet<Vector3> visitedPositions = new HashSet<Vector3>();
+        Queue<Vector3> positionsToCheck = new Queue<Vector3>();
+        List<Vector3> filledPositions = new List<Vector3>(); // Store filled positions
+
+        positionsToCheck.Enqueue(initialPosition);
+
+        while (positionsToCheck.Count > 0)
+        {
+            Vector3 position = positionsToCheck.Dequeue();
+
+            if (!IsWithinBoundsXZ(position) || visitedPositions.Contains(position))
+            {
+                continue;
+            }
+
+            visitedPositions.Add(position);
+
+            if (placedWall.Keys.Contains(position) || filledPositions.Contains(position))
+            {
+                //found walls
+                //if you found both positions of the walls then add wall to room if not dont
+
+                continue;
+            }
+            else
+            {
+                Instantiate(floodPrefab, position, Quaternion.identity);
+                //wallPositions.Add(position);
+                filledPositions.Add(position); // Add filled position to the list
+            }
+
+            positionsToCheck.Enqueue(position + (Vector3.forward / 2));
+            positionsToCheck.Enqueue(position + (Vector3.back / 2));
+            positionsToCheck.Enqueue(position + (Vector3.left / 2));
+            positionsToCheck.Enqueue(position + (Vector3.right / 2));
+        }
+
+        return filledPositions; // Return the list of filled positions
     }
 
-    private void RecursiveFloodFill(Vector3 position)
-    {
-        if (!IsWithinBoundsXZ(position))
-        {
-            return;
-        }
-
-        if (placedObjects.Values.Contains(position))
-        {
-            //Vector3 worldPosition = wallPlacementGrid.GetCellCenterWorld(position);
-
-            //wallPlacementGrid.SetTile(position, floodPrefab.GetComponent<Tile>());
-            return;
-        }
-        else
-        {
-            //po
-            var g = Instantiate(floodPrefab, position, Quaternion.identity);
-            placedObjects.Add(g, position);
-            //return; // Stop the flood if a tile is already present here
-        }
-
-        RecursiveFloodFill(position + Vector3Int.forward);
-        RecursiveFloodFill(position + Vector3Int.back);
-        RecursiveFloodFill(position + Vector3Int.left);
-        RecursiveFloodFill(position + Vector3Int.right);
-    }
 }

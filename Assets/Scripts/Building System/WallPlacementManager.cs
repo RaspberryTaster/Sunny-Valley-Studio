@@ -113,9 +113,10 @@ public class WallPlacementManager : Singleton<WallPlacementManager>
         Vector3 spawnPosition = startPoint + direction * (spacing * i);
         Wall newWall = Instantiate(wall, spawnPosition, Quaternion.identity);
         newWall.transform.forward = direction;
-        newWall.spacing = spacing;
+
         // Optionally, you can parent the cubes to the wallsParent for organization.
         newWall.transform.parent = wallsParent.transform;
+                newWall.SetPos();
         // Align the cubes along the line direction
     }
                 
