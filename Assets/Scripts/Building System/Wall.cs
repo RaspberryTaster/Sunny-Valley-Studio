@@ -14,6 +14,7 @@ public enum CeilingDirection
 
 public class Wall : MonoBehaviour, ICollidable
 {
+    public bool isDiagonal;
     public CeilingDirection ceilingDirection;
     public Transform endPoint;
     public GameObject FrontCeiling;
@@ -53,6 +54,18 @@ public class Wall : MonoBehaviour, ICollidable
         
     }
 
+
+    public void InformNode()
+    {
+        if(isDiagonal)
+        {
+            //setnode tell node at your position that it has a diagonal wall on it
+        }
+        else
+        {
+            //tell front and back nodes that they have wall on them.
+        }
+    }
     private void OnDestroy()
     {
         FloodFillRoom.Instance.RemoveWall(this);

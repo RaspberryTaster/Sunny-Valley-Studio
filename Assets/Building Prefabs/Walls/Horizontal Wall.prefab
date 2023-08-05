@@ -182,7 +182,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d93699e455ad16408eb7ecb7d0b703f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ceilingDirection: 1
+  ceilingDirection: 0
   endPoint: {fileID: 2062154701026080142}
   FrontCeiling: {fileID: 6317518489488628620}
   BackCeiling: {fileID: 3580224156205079143}
@@ -471,7 +471,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: f8fe66d2caf05af42992bed6eed56f0a,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

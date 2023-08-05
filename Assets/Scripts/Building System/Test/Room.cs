@@ -11,7 +11,7 @@ namespace Assets.Scripts.Building_System.Test
     public class Room
     {
         public List<Wall> walls = new List<Wall>();
-
+        public 
         public Vector3 position;
 
         public void AddWall(Wall wall)

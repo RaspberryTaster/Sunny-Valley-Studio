@@ -1,4 +1,5 @@
 using Assets.Scripts.Building_System.Test;
+using Assets.Scripts.Extensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -124,7 +125,11 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
             visitedPositions.Add(position);
 
-            if (placedWall.Keys.Contains(position) || filledPositions.Contains(position))
+            if(filledPositions.Contains(position))
+            {
+                continue;
+            }
+            else if (placedWall.Keys.Contains(position))
             {
                 //found walls
                 //if you found both positions of the walls then add wall to room if not dont
@@ -133,7 +138,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
             }
             else
             {
-                Instantiate(floodPrefab, position, Quaternion.identity);
+                Instantiate(floodPrefab, PlacementUtils.WorldPositionToGridPosition(position,groundGrid), Quaternion.identity);
                 //wallPositions.Add(position);
                 filledPositions.Add(position); // Add filled position to the list
             }
