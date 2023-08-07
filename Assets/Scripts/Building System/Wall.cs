@@ -1,5 +1,5 @@
 using Assets.Scripts.Building_System;
-using System.Collections;
+using Assets.Scripts.Building_System.Test;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -49,13 +49,29 @@ public class Wall : MonoBehaviour, ICollidable
         }
     }
 
+
+    private void Start()
+    {
+        Set();
+    }
     private void OnEnable()
     {
         
     }
 
+    public void Set()
+    {
+        InformNeighbour(FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position + wallObject.transform.forward/2));
+        InformNeighbour(FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position + -wallObject.transform.forward/2));
+    }
 
-    public void InformNode()
+
+    public void Unset()
+    {
+        FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position + wallObject.transform.forward / 2);
+        FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position + -wallObject.transform.forward / 2);
+    }
+    public void InformNeighbour(Node n)
     {
         if(isDiagonal)
         {
@@ -63,7 +79,47 @@ public class Wall : MonoBehaviour, ICollidable
         }
         else
         {
-            //tell front and back nodes that they have wall on them.
+            Vector3 direction = wallObject.transform.position - new Vector3(n.position.x,wallObject.transform.position.y,n.position.z);
+            Debug.Log(direction);
+            direction.Normalize();
+
+            float angle = Vector3.Angle(Vector3.forward, direction); // Angle between the forward vector and the direction vector
+
+            if (angle < 45.0f)
+            {
+                if ((n.wallDirections & HorizontalWallDirection.North) == 0)
+                {
+                    n.wallDirections |= HorizontalWallDirection.North;
+                    Debug.Log(n.position + " is to the north");
+                }
+            }
+            else if (angle < 135.0f)
+            {
+                if (direction.x > 0)
+                {
+                    if ((n.wallDirections & HorizontalWallDirection.East) == 0)
+                    {
+                        n.wallDirections |= HorizontalWallDirection.East;
+                        Debug.Log(n.position + " is to the east");
+                    }
+                }
+                else
+                {
+                    if ((n.wallDirections & HorizontalWallDirection.West) == 0)
+                    {
+                        n.wallDirections |= HorizontalWallDirection.West;
+                        Debug.Log(n.position + " is to the west");
+                    }
+                }
+            }
+            else
+            {
+                if ((n.wallDirections & HorizontalWallDirection.South) == 0)
+                {
+                    n.wallDirections |= HorizontalWallDirection.South;
+                    Debug.Log(n.position + " is to the south");
+                }
+            }
         }
     }
     private void OnDestroy()
@@ -95,4 +151,13 @@ public class Wall : MonoBehaviour, ICollidable
         connectedWalls = connectedWalls.OrderByDescending(wall => Vector3.Distance(this.transform.position, wall.wallObject.transform.position)).ToList();
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(wallObject.transform.position + wallObject.transform.forward/2, .2f);
+        Gizmos.DrawSphere(wallObject.transform.position + -wallObject.transform.forward/2, .2f);
+        Gizmos.color = Color.red;
+        //Gizmos.DrawSphere(wallObject.transform.position + -wallObject.transform.right/2, .2f);
+        //Gizmos.DrawSphere(wallObject.transform.position + wallObject.transform.right/2, .2f);
+    }
 }

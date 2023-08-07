@@ -10,8 +10,7 @@ namespace Assets.Scripts.Building_System.Test
     [System.Serializable]
     public class Room
     {
-        public List<Wall> walls = new List<Wall>();
-        public 
+        public List<Wall> walls = new List<Wall>(); 
         public Vector3 position;
 
         public void AddWall(Wall wall)
