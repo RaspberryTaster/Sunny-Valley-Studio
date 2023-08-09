@@ -13,6 +13,7 @@ namespace Assets.Scripts.Building_System.Test
         public List<Wall> walls = new List<Wall>(); 
         public List<Vector3> nodePositons = new List<Vector3>();
         public Vector3 position;
+        public Room() { }
 
         public Room(List<Vector3> nodePositons, List<Wall> walls)
         {

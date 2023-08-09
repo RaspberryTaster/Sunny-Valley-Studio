@@ -1,5 +1,12 @@
+using Assets.Scripts.Building_System.Test;
 using Assets.Scripts.Extensions;
 using UnityEngine;
+
+
+public enum WallOrientation
+{
+    LINEAR, DIAGONAL_ALPHA,DIGONAL_BETA
+}
 
 public class WallPlacementManager : Singleton<WallPlacementManager>
 {
@@ -12,6 +19,7 @@ public class WallPlacementManager : Singleton<WallPlacementManager>
 
     private Vector3 previousStartPoint;
     private Vector3 previousEndPoint;
+
 
     private void Start()
     {
@@ -42,6 +50,9 @@ public class WallPlacementManager : Singleton<WallPlacementManager>
         // Destroy the parent GameObject (walls) and all its children (cubes)
         Destroy(wallsParent);
     }
+
+
+
 
     public void DetatchWalls()
     {
@@ -128,7 +139,7 @@ public class WallPlacementManager : Singleton<WallPlacementManager>
 
     private float GetDiagonalSpacing()
     {
-        return Mathf.Sqrt(0.5f * 0.5f * 2f);
+        return Mathf.Sqrt(1 * 1 * 2f);
     }
 
     private void OnDrawGizmos()

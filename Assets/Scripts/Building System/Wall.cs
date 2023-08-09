@@ -21,7 +21,7 @@ public class Wall : MonoBehaviour, ICollidable
     public GameObject BackCeiling;
     public GameObject wallObject;
     [SerializeField] private float distance = 0.5f; // Distance of the sphere gizmo from the object
-
+    public WallOrientation wallOrientation;
     public List<Wall> connectedWalls;
     private void OnValidate()
     {
@@ -61,10 +61,37 @@ public class Wall : MonoBehaviour, ICollidable
 
     public void Set()
     {
-        InformNeighbour(FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position + wallObject.transform.forward/2));
-        InformNeighbour(FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position + -wallObject.transform.forward/2));
+
+        if(isDiagonal)
+        {
+            //get node at wallboject position.
+            SetDiagonalOrientation(FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position));
+        }
+        else
+        {
+            InformNeighbour(FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position + wallObject.transform.forward / 2));
+            InformNeighbour(FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position + -wallObject.transform.forward / 2));
+        }
     }
 
+    //get the nose that this above.
+    //set the orientation
+    public void SetDiagonalOrientation(Node n)
+    {
+        Vector3 rel = transform.position - n.position;
+        
+        if (rel == new Vector3(-0.5f, 0, -0.5f) || rel == new Vector3(0.5f, 0, 0.5f))
+        {
+            wallOrientation = WallOrientation.DIAGONAL_ALPHA;
+            n.wallDirections |= WallDirection.Diagonal_Alpha;
+        }
+        else if (rel == new Vector3(0.5f, 0, -0.5f) || rel == new Vector3(-0.5f, 0, 0.5f))
+        {
+            wallOrientation = WallOrientation.DIGONAL_BETA;
+            n.wallDirections |= WallDirection.Diagonal_Beta;
+        }
+
+    }
 
     public void Unset()
     {
@@ -76,6 +103,9 @@ public class Wall : MonoBehaviour, ICollidable
         if(isDiagonal)
         {
             //setnode tell node at your position that it has a diagonal wall on it
+
+            // no bro instead tell them they have both directions.
+            
         }
         else
         {
@@ -87,9 +117,9 @@ public class Wall : MonoBehaviour, ICollidable
 
             if (angle < 45.0f)
             {
-                if ((n.wallDirections & HorizontalWallDirection.North) == 0)
+                if ((n.wallDirections & WallDirection.North) == 0)
                 {
-                    n.wallDirections |= HorizontalWallDirection.North;
+                    n.wallDirections |= WallDirection.North;
                     Debug.Log(n.position + " is to the north");
                 }
             }
@@ -97,26 +127,26 @@ public class Wall : MonoBehaviour, ICollidable
             {
                 if (direction.x > 0)
                 {
-                    if ((n.wallDirections & HorizontalWallDirection.East) == 0)
+                    if ((n.wallDirections & WallDirection.East) == 0)
                     {
-                        n.wallDirections |= HorizontalWallDirection.East;
+                        n.wallDirections |= WallDirection.East;
                         Debug.Log(n.position + " is to the east");
                     }
                 }
                 else
                 {
-                    if ((n.wallDirections & HorizontalWallDirection.West) == 0)
+                    if ((n.wallDirections & WallDirection.West) == 0)
                     {
-                        n.wallDirections |= HorizontalWallDirection.West;
+                        n.wallDirections |= WallDirection.West;
                         Debug.Log(n.position + " is to the west");
                     }
                 }
             }
             else
             {
-                if ((n.wallDirections & HorizontalWallDirection.South) == 0)
+                if ((n.wallDirections & WallDirection.South) == 0)
                 {
-                    n.wallDirections |= HorizontalWallDirection.South;
+                    n.wallDirections |= WallDirection.South;
                     Debug.Log(n.position + " is to the south");
                 }
             }

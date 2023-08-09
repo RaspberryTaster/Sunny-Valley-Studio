@@ -232,25 +232,75 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
             var wallDirections = curNode.wallDirections;
 
-            if ((wallDirections & HorizontalWallDirection.North) == 0 && p.dir != Vector3.forward)
+            if((curNode.wallDirections & WallDirection.Diagonal_Alpha) != 0)
             {
-                positionsToCheck.Enqueue(new PosDir(position + Vector3.forward, Vector3.back)); // Avoid going back
+                //bool approachingTop = p.dir == Vector3.left || p.dir == Vector3.forward;
+                //thjat means you only option is to go 
+                //that means you cant go any further down or right
+                //can only go the opposite  of for or left
+
+                if(p.dir == Vector3.forward)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.left, Vector3.right));
+                }
+                else if(p.dir == Vector3.left)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.forward, Vector3.back));
+                }
+                else if(p.dir == Vector3.right)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.back, Vector3.forward));
+                }
+                else
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.right, Vector3.left));
+                }
+            }
+            else if((curNode.wallDirections & WallDirection.Diagonal_Beta) != 0)
+            {
+                if(p.dir == Vector3.forward)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.right, Vector3.left));
+                }
+                else if(p.dir == Vector3.right)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.forward, Vector3.back));
+                }
+                else if(p.dir == Vector3.left)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.back, Vector3.forward));
+                }
+                else
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.left, Vector3.right));
+                }
+            }
+            else
+            {
+                if ((wallDirections & WallDirection.North) == 0 && p.dir != Vector3.forward)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.forward, Vector3.back)); // Avoid going back
+                }
+
+                if ((wallDirections & WallDirection.South) == 0 && p.dir != Vector3.back)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.back, Vector3.forward)); // Avoid going forward
+                }
+
+                if ((wallDirections & WallDirection.West) == 0 && p.dir != Vector3.left)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.left, Vector3.right)); // Avoid going right
+                }
+
+                if ((wallDirections & WallDirection.East) == 0 && p.dir != Vector3.right)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.right, Vector3.left)); // Avoid going left
+                }
+
+
             }
 
-            if ((wallDirections & HorizontalWallDirection.South) == 0 && p.dir != Vector3.back)
-            {
-                positionsToCheck.Enqueue(new PosDir(position + Vector3.back, Vector3.forward)); // Avoid going forward
-            }
-
-            if ((wallDirections & HorizontalWallDirection.West) == 0 && p.dir != Vector3.left)
-            {
-                positionsToCheck.Enqueue(new PosDir(position + Vector3.left, Vector3.right)); // Avoid going right
-            }
-
-            if ((wallDirections & HorizontalWallDirection.East) == 0 && p.dir != Vector3.right)
-            {
-                positionsToCheck.Enqueue(new PosDir(position + Vector3.right, Vector3.left)); // Avoid going left
-            }
+            //if wall directions include Wall.diagonal_alpha 
         }
 
         return filledPositions; // Return the list of filled positions
