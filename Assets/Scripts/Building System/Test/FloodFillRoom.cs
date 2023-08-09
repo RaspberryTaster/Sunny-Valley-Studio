@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UIElements;
 
 public struct PosDir
 {
@@ -42,7 +43,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                Vector3 placementPosition = Position(hit.point);
+                Vector3 placementPosition = PlacementUtils.WorldPositionToGridPosition(hit.point, groundGrid);
 
                 // Check if placement position is within bounds
                 if (IsWithinBoundsXZ(placementPosition))
@@ -155,20 +156,58 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
         //StartFloodFill(position);
     }
 
-     
+
+    public void CreateRoom(Vector3 position)
+    {
+
+        GenerateRoom(FloodFill(position));
+    }
+    private void GenerateRoom(List<Vector3> filledPositions)
+    {
+        List<Vector3> nodePositions = new List<Vector3>();
+        List<Wall> encounteredWalls = new List<Wall>();
+
+        foreach (var position in filledPositions)
+        {
+            Node node = GetNodeAtPos(position);
+            if (node != null)
+            {
+                nodePositions.Add(position);
+            }
+
+            if (placedWall.ContainsKey(position))
+            {
+                foreach (var wall in placedWall[position])
+                {
+                    if (!encounteredWalls.Contains(wall))
+                    {
+                        encounteredWalls.Add(wall);
+                    }
+                }
+            }
+        }
+
+        Room newRoom = new Room(nodePositions, encounteredWalls);
+        // Now you have the room data in the newRoom object, you can do further processing or use it as needed.
+    }
+
+
     private List<Vector3> FloodFill(Vector3 initialPosition)
     {
         HashSet<Vector3> visitedPositions = new HashSet<Vector3>();
         Queue<PosDir> positionsToCheck = new Queue<PosDir>();
         List<Vector3> filledPositions = new List<Vector3>(); // Store filled positions
 
-        positionsToCheck.Enqueue(new PosDir(initialPosition,Vector3.zero));
+        positionsToCheck.Enqueue(new PosDir(initialPosition, Vector3.zero));
+        
 
-        while (positionsToCheck.Count > 0)
+
+        while (positionsToCheck.Count > 0) // Continue until all positions are processed
         {
+            
             PosDir p = positionsToCheck.Dequeue();
             Vector3 position = p.pos;
-
+            Node curNode = Instance.GetNodeAtPos(position);
             if (!IsWithinBoundsXZ(position) || visitedPositions.Contains(position))
             {
                 continue;
@@ -176,28 +215,42 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
             visitedPositions.Add(position);
 
-            if(filledPositions.Contains(position))
+            if (filledPositions.Contains(position))
             {
                 continue;
             }
             else if (placedWall.Keys.Contains(position))
             {
-                //found walls
-                //if you found both positions of the walls then add wall to room if not dont
-
+                // Handle walls
                 continue;
             }
             else
             {
-                Instantiate(floodPrefab, PlacementUtils.WorldPositionToGridPosition(position,groundGrid), Quaternion.identity);
-                //wallPositions.Add(position);
+                Instantiate(floodPrefab, PlacementUtils.WorldPositionToGridPosition(position, groundGrid), Quaternion.identity);
                 filledPositions.Add(position); // Add filled position to the list
             }
 
-            positionsToCheck.Enqueue(new PosDir(position +(Vector3.forward / 2), (Vector3.forward / 2)));
-            positionsToCheck.Enqueue(new PosDir(position + (Vector3.back / 2), (Vector3.back / 2)));
-            positionsToCheck.Enqueue(new PosDir(position + (Vector3.left / 2), (Vector3.left / 2)));
-            positionsToCheck.Enqueue(new PosDir(position + (Vector3.right / 2), (Vector3.right / 2)));
+            var wallDirections = curNode.wallDirections;
+
+            if ((wallDirections & HorizontalWallDirection.North) == 0 && p.dir != Vector3.forward)
+            {
+                positionsToCheck.Enqueue(new PosDir(position + Vector3.forward, Vector3.back)); // Avoid going back
+            }
+
+            if ((wallDirections & HorizontalWallDirection.South) == 0 && p.dir != Vector3.back)
+            {
+                positionsToCheck.Enqueue(new PosDir(position + Vector3.back, Vector3.forward)); // Avoid going forward
+            }
+
+            if ((wallDirections & HorizontalWallDirection.West) == 0 && p.dir != Vector3.left)
+            {
+                positionsToCheck.Enqueue(new PosDir(position + Vector3.left, Vector3.right)); // Avoid going right
+            }
+
+            if ((wallDirections & HorizontalWallDirection.East) == 0 && p.dir != Vector3.right)
+            {
+                positionsToCheck.Enqueue(new PosDir(position + Vector3.right, Vector3.left)); // Avoid going left
+            }
         }
 
         return filledPositions; // Return the list of filled positions

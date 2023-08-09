@@ -154,8 +154,8 @@ public class Wall : MonoBehaviour, ICollidable
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(wallObject.transform.position + wallObject.transform.forward/2, .2f);
-        Gizmos.DrawSphere(wallObject.transform.position + -wallObject.transform.forward/2, .2f);
+        Gizmos.DrawSphere(wallObject.transform.position + wallObject.transform.forward, .2f);
+        Gizmos.DrawSphere(wallObject.transform.position + -wallObject.transform.forward, .2f);
         Gizmos.color = Color.red;
         //Gizmos.DrawSphere(wallObject.transform.position + -wallObject.transform.right/2, .2f);
         //Gizmos.DrawSphere(wallObject.transform.position + wallObject.transform.right/2, .2f);

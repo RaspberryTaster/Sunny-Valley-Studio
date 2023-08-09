@@ -11,7 +11,18 @@ namespace Assets.Scripts.Building_System.Test
     public class Room
     {
         public List<Wall> walls = new List<Wall>(); 
+        public List<Vector3> nodePositons = new List<Vector3>();
         public Vector3 position;
+
+        public Room(List<Vector3> nodePositons, List<Wall> walls)
+        {
+            this.nodePositons = nodePositons;
+
+            foreach(var wall in walls)
+            {
+                AddWall(wall);
+            }
+        }
 
         public void AddWall(Wall wall)
         {

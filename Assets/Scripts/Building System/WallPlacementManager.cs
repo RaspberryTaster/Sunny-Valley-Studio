@@ -123,7 +123,7 @@ public class WallPlacementManager : Singleton<WallPlacementManager>
     // Calculate the spacing based on the angle between start and end points
     private float GetSpacing()
     {
-        return PlacementUtils.IsDiagonal(endPoint,startPoint) ? GetDiagonalSpacing() : 0.5f;
+        return PlacementUtils.IsDiagonal(endPoint,startPoint) ? GetDiagonalSpacing() : 1f;
     }
 
     private float GetDiagonalSpacing()
