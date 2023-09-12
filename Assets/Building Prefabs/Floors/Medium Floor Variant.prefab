@@ -342,6 +342,15 @@ PrefabInstance:
       propertyPath: m_Name
       value: Grid Visual
       objectReference: {fileID: 0}
+    - target: {fileID: 1983743797, guid: fc47adb7a719add46aada8045eed61cb, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3634807337282020182, guid: fc47adb7a719add46aada8045eed61cb,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3634807337282020200, guid: fc47adb7a719add46aada8045eed61cb,
         type: 3}
       propertyPath: m_NavMeshData

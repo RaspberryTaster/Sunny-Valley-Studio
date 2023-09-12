@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[System.FlagsAttribute]
+[System.Flags]
 public enum CeilingDirection
 {
     None = 0,
@@ -20,7 +20,6 @@ public class Wall : MonoBehaviour, ICollidable
     public GameObject FrontCeiling;
     public GameObject BackCeiling;
     public GameObject wallObject;
-    [SerializeField] private float distance = 0.5f; // Distance of the sphere gizmo from the object
     public WallOrientation wallOrientation;
     public List<Wall> connectedWalls;
     private void OnValidate()
@@ -53,6 +52,8 @@ public class Wall : MonoBehaviour, ICollidable
     private void Start()
     {
         Set();
+        //flood fill and find the rooms
+        //FloodFillRoom.
     }
     private void OnEnable()
     {

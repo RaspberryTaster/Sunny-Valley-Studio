@@ -9,7 +9,7 @@ public class AngleCalculator : MonoBehaviour
 
     void Start()
     {
-        //NewMethod();
+        //SetMat();
     }
 
     [Button]

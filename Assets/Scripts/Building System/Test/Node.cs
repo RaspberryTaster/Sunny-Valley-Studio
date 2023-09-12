@@ -22,6 +22,7 @@ namespace Assets.Scripts.Building_System.Test
         public WallDirection wallDirections;
         public Dictionary<Wall, WallDirection> wallDictionary;
 
+        public List<Room> rooms;
 
         public void SetPos(Vector3 pos)
         {
