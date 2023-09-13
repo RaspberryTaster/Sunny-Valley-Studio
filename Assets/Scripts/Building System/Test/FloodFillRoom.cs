@@ -20,40 +20,52 @@ public struct PosDir
     }
 }
 
+public class PositionOwnershipPair
+{
+    public Vector3 Position { get; set; }
+    public PanelFloorOwnership Ownership { get; set; }
+
+    public PositionOwnershipPair(Vector3 position, PanelFloorOwnership ownership)
+    {
+        Position = position;
+        Ownership = ownership;
+    }
+}
+
 public class FloodFillRoom : Singleton<FloodFillRoom>
 {
-    public Tilemap wallPlacementGrid;
-    public Tilemap groundGrid;
-    public Renderer boundsPlane;
-    public Panel floodPrefab;
-    public Node nodePrefab;
-    private Camera mainCamera;
-    public List<Vector3> wallPositions;
-    private Dictionary<Vector3, List<Wall>> placedWall = new Dictionary<Vector3, List<Wall>>();
-    private Dictionary<Vector3, Node> nodes = new Dictionary<Vector3, Node>();
+    public Tilemap _wallPlacementGrid;
+    public Tilemap _groundGrid;
+    public Renderer _boundsPlane;
+    public Panel _floodPrefab;
+    public Node _nodePrefab;
+    private Camera _mainCamera;
+    public List<Vector3> _wallPositions;
+    private Dictionary<Vector3, List<Wall>> _placedWall = new Dictionary<Vector3, List<Wall>>();
+    private Dictionary<Vector3, Node> _nodes = new Dictionary<Vector3, Node>();
 
-    public Dictionary<Vector3, Panel> allPanels = new();
-    public Material tempFloodMat;
+    public Dictionary<Vector3, Panel> _allPanels = new();
+    public Material _tempFloodMat;
     private void Start()
     {
-        mainCamera = Camera.main;
+        _mainCamera = Camera.main;
     }
 
     private void Update()
     {
         if (Input.GetMouseButtonDown(1))
         {
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+            Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
 
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                Vector3 placementPosition = PlacementUtils.WorldPositionToGridPosition(hit.point, groundGrid);
+                Vector3 placementPosition = PlacementUtils.WorldPositionToGridPosition(hit.point, _groundGrid);
 
                 Debug.Log("Flood");
                 // Check if placement position is within bounds
                 if (IsWithinBoundsXZ(placementPosition))
                 {
-                    StartFloodFill(placementPosition);
+                    BeginRoomGeneration(placementPosition);
                 }
             }
 
@@ -61,7 +73,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+            Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
 
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
@@ -70,7 +82,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
                 // Check if placement position is within bounds
                 if (IsWithinBoundsXZ(placementPosition))
                 {
-                    StartFloodFill(placementPosition);
+                    BeginRoomGeneration(placementPosition);
                 }
             }
 
@@ -82,17 +94,17 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
     {
         //if
 
-        var p = PlacementUtils.WorldPositionToGridPosition(position, groundGrid);
-        if (nodes.ContainsKey(p))
+        var p = PlacementUtils.WorldPositionToGridPosition(position, _groundGrid);
+        if (_nodes.ContainsKey(p))
         {
-            return nodes[p];
+            return _nodes[p];
         }
         else
         {
 
-            var n = Instantiate(nodePrefab);
+            var n = Instantiate(_nodePrefab);
             n.SetPos(p);
-            nodes.Add(p, n);
+            _nodes.Add(p, n);
             return n;
         }
 
@@ -101,51 +113,51 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
     {
         Vector3 key = Position(w.transform.position);
         Vector3 key1 = Position(w.endPoint.position);
-        wallPositions.Add(key);
-        wallPositions.Add(key1);
+        _wallPositions.Add(key);
+        _wallPositions.Add(key1);
 
-        // Add the wall to the placedWall dictionary
-        if (!placedWall.ContainsKey(key))
+        // Add the wall to the _placedWall dictionary
+        if (!_placedWall.ContainsKey(key))
         {
-            placedWall[key] = new List<Wall>();
+            _placedWall[key] = new List<Wall>();
         }
-        placedWall[key].Add(w);
+        _placedWall[key].Add(w);
 
-        if (!placedWall.ContainsKey(key1))
+        if (!_placedWall.ContainsKey(key1))
         {
-            placedWall[key1] = new List<Wall>();
+            _placedWall[key1] = new List<Wall>();
         }
-        placedWall[key1].Add(w);
+        _placedWall[key1].Add(w);
     }
 
     public void RemoveWall(Wall w)
     {
         Vector3 key = Position(w.transform.position);
         Vector3 key1 = Position(w.endPoint.position);
-        wallPositions.Remove(key);
-        wallPositions.Remove(key1);
+        _wallPositions.Remove(key);
+        _wallPositions.Remove(key1);
 
-        // Remove the wall from the placedWall dictionary
-        if (placedWall.ContainsKey(key))
+        // Remove the wall from the _placedWall dictionary
+        if (_placedWall.ContainsKey(key))
         {
-            placedWall[key].Remove(w);
+            _placedWall[key].Remove(w);
         }
 
-        if (placedWall.ContainsKey(key1))
+        if (_placedWall.ContainsKey(key1))
         {
-            placedWall[key1].Remove(w);
+            _placedWall[key1].Remove(w);
         }
     }
 
     public Vector3 Position(Vector3 position)
     {
-        Vector3Int gridPosition = wallPlacementGrid.WorldToCell(position);
-        return wallPlacementGrid.GetCellCenterWorld(gridPosition);
+        Vector3Int gridPosition = _wallPlacementGrid.WorldToCell(position);
+        return _wallPlacementGrid.GetCellCenterWorld(gridPosition);
     }
 
     private bool IsWithinBoundsXZ(Vector3 position)
     {
-        Bounds bounds = boundsPlane.bounds;
+        Bounds bounds = _boundsPlane.bounds;
 
         bool withinXBounds = position.x >= bounds.min.x && position.x <= bounds.max.x;
         bool withinZBounds = position.z >= bounds.min.z && position.z <= bounds.max.z;
@@ -153,23 +165,21 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
         return withinXBounds && withinZBounds;
     }
 
-    private void StartFloodFill(Vector3 position)
+    private void BeginRoomGeneration(Vector3 position)
     {
 
         //if (!IsWithinBoundsXZ(position)) return;
-        FloodFill(position);
-    }
-
-
-    public void CreateRoom(Vector3 position)
-    {
-
         GenerateRoom(FloodFill(position));
     }
+
+
     private void GenerateRoom(List<Vector3> filledPositions)
     {
+
+        if (filledPositions.Count == 0) return;
         List<Vector3> nodePositions = new List<Vector3>();
         List<Wall> encounteredWalls = new List<Wall>();
+
 
         foreach (var position in filledPositions)
         {
@@ -179,9 +189,9 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
                 nodePositions.Add(position);
             }
 
-            if (placedWall.ContainsKey(position))
+            if (_placedWall.ContainsKey(position))
             {
-                foreach (var wall in placedWall[position])
+                foreach (var wall in _placedWall[position])
                 {
                     if (!encounteredWalls.Contains(wall))
                     {
@@ -191,49 +201,69 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
             }
         }
 
+        _mat = RandomMaterialColor();
+        Debug.Log(_fragmentedPositionsToColor.Count);
+        ChangeMat(_positionsToColor, _mat);
+        ChangeMat(_fragmentedPositionsToColor, _mat);
+
         Room newRoom = new Room(nodePositions, encounteredWalls);
         // Now you have the room data in the newRoom object, you can do further processing or use it as needed.
     }
 
-
+    Material _mat;
+    Queue<Vector3> _positionsToColor = new Queue<Vector3>();
+    Queue<PositionOwnershipPair> _fragmentedPositionsToColor = new Queue<PositionOwnershipPair>();
     private List<Vector3> FloodFill(Vector3 initialPosition)
     {
         HashSet<Vector3> visitedPositions = new HashSet<Vector3>();
         Queue<PosDir> positionsToCheck = new Queue<PosDir>();
         List<Vector3> filledPositions = new List<Vector3>(); // Store filled positions
-        var mat = RandomMaterialColor();
+
+        _positionsToColor.Clear();
+        _fragmentedPositionsToColor.Clear();
+        //_mat = RandomMaterialColor();
         positionsToCheck.Enqueue(new PosDir(initialPosition, Vector3.zero));
         while (positionsToCheck.Count > 0) // Continue until all positions are processed
         {
 
             PosDir p = positionsToCheck.Dequeue();
             Vector3 position = p.pos;
-            Node curNode = Instance.GetNodeAtPos(position);
+            Node curNode = GetNodeAtPos(position);
             var wallDirections = curNode.wallDirections;
-            if (!IsWithinBoundsXZ(position) || visitedPositions.Contains(position))
+            if (!IsWithinBoundsXZ(position))
+            {
+                Debug.LogWarning("Lead to outdoors.");
+                return new List<Vector3>();
+                //continue;
+            }
+
+            if (visitedPositions.Contains(position))
             {
                 continue;
             }
 
             visitedPositions.Add(position);
 
-            if (filledPositions.Contains(position) || allPanels.Keys.Contains(position))
+            if (filledPositions.Contains(position) || _allPanels.Keys.Contains(position))
             {
-                SetMat(position, curNode, mat);
+                _positionsToColor.Enqueue(position);
+                //SetMat(position, curNode, _mat);
                 //continue;
             }
-            else if (placedWall.Keys.Contains(position))
+            else if (_placedWall.Keys.Contains(position))
             {
-                SetMat(position, curNode,mat);
-                // Handle walls
+                _positionsToColor.Enqueue(position);
+                //SetMat(position, curNode,_mat);
+                // Handle walls 
                 continue;
             }
             else
             {
-                var x = Instantiate(floodPrefab, PlacementUtils.WorldPositionToGridPosition(position+new Vector3(0,0000001f,0), groundGrid), Quaternion.identity);
-                allPanels.Add(position, x);
+                var x = Instantiate(_floodPrefab, PlacementUtils.WorldPositionToGridPosition(position+new Vector3(0,0000001f,0), _groundGrid), Quaternion.identity);
+                _allPanels.Add(position, x);
                 filledPositions.Add(position); // Add filled position to the list
-                SetMat(position, curNode,mat);
+                _positionsToColor.Enqueue(position);
+                //SetMat(position, curNode,_mat);
             }
 
 
@@ -247,29 +277,37 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
                 if (p.dir == Vector3.forward)
                 {
-                    allPanels[position].SetMaterials(PanelFloorOwnership.A, mat);
-                    allPanels[position].SetMaterials(PanelFloorOwnership.D, mat);
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.A));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.D));
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.A, _mat);
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.D, _mat);
                     //Means A and D on panel belong to the room
                     positionsToCheck.Enqueue(new PosDir(position + Vector3.left, Vector3.right));
                 }
                 else if (p.dir == Vector3.left)
                 {
-                    allPanels[position].SetMaterials(PanelFloorOwnership.A, mat);
-                    allPanels[position].SetMaterials(PanelFloorOwnership.D, mat);
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.A));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.D));
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.A, _mat);
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.D, _mat);
                     //Means A and D on panel belong to the room
                     positionsToCheck.Enqueue(new PosDir(position + Vector3.forward, Vector3.back));
                 }
                 else if (p.dir == Vector3.right)
                 {
-                    allPanels[position].SetMaterials(PanelFloorOwnership.B, mat);
-                    allPanels[position].SetMaterials(PanelFloorOwnership.C, mat);
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.B));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position , PanelFloorOwnership.C));
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.B, _mat);
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.C, _mat);
                     //Means B and C on panel belong to the room
                     positionsToCheck.Enqueue(new PosDir(position + Vector3.back, Vector3.forward));
                 }
                 else
                 {
-                    allPanels[position].SetMaterials(PanelFloorOwnership.B, mat);
-                    allPanels[position].SetMaterials(PanelFloorOwnership.C, mat);
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.B));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.C));
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.B, _mat);
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.C, _mat);
                     //Means B and C on panel belong to the room
                     positionsToCheck.Enqueue(new PosDir(position + Vector3.right, Vector3.left));
                 }
@@ -278,30 +316,38 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
             {
                 if (p.dir == Vector3.forward)
                 {
-                    allPanels[position].SetMaterials(PanelFloorOwnership.A, mat);
-                    allPanels[position].SetMaterials(PanelFloorOwnership.B, mat);
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.A));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.B));
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.A, _mat);
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.B, _mat);
                     //Means A and B on panel belong to the room
                     //D And C now must become empty
                     positionsToCheck.Enqueue(new PosDir(position + Vector3.right, Vector3.left));
                 }
                 else if (p.dir == Vector3.right)
                 {
-                    allPanels[position].SetMaterials(PanelFloorOwnership.A, mat);
-                    allPanels[position].SetMaterials(PanelFloorOwnership.B, mat);
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.A));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.B));
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.A, _mat);
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.B, _mat);
                     //Means A and B on panel belong to the room
                     positionsToCheck.Enqueue(new PosDir(position + Vector3.forward, Vector3.back));
                 }
                 else if (p.dir == Vector3.left)
                 {
-                    allPanels[position].SetMaterials(PanelFloorOwnership.D, mat);
-                    allPanels[position].SetMaterials(PanelFloorOwnership.C, mat);
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.D));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.C));
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.D, _mat);
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.C, _mat);
                     //Means D and C on panel belong to the room
                     positionsToCheck.Enqueue(new PosDir(position + Vector3.back, Vector3.forward));
                 }
                 else
                 {
-                    allPanels[position].SetMaterials(PanelFloorOwnership.D, mat);
-                    allPanels[position].SetMaterials(PanelFloorOwnership.C, mat);
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.D));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.C));
+                   // _allPanels[position].SetMaterials(PanelFloorOwnership.D, _mat);
+                    //_allPanels[position].SetMaterials(PanelFloorOwnership.C, _mat);
                     //Means D and C on panel belong to the room
                     positionsToCheck.Enqueue(new PosDir(position + Vector3.left, Vector3.right));
                 }
@@ -336,12 +382,220 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
         return filledPositions; // Return the list of filled positions
     }
+    /*
+     private List<Vector3> FloodFill(Vector3 initialPosition)
+    {
+        HashSet<Vector3> visitedPositions = new HashSet<Vector3>();
+        Queue<PosDir> positionsToCheck = new Queue<PosDir>();
+        List<Vector3> filledPositions = new List<Vector3>(); // Store filled positions
+
+        _positionsToColor.Clear();
+        _fragmentedPositionsToColor.Clear();
+        _mat = RandomMaterialColor();
+        positionsToCheck.Enqueue(new PosDir(initialPosition, Vector3.zero));
+        while (positionsToCheck.Count > 0) // Continue until all positions are processed
+        {
+
+            PosDir p = positionsToCheck.Dequeue();
+            Vector3 position = p.pos;
+            Node curNode = Instance.GetNodeAtPos(position);
+            var wallDirections = curNode.wallDirections;
+            if (!IsWithinBoundsXZ(position))
+            {
+                Debug.LogWarning("Lead to outdoors.");
+                return new List<Vector3>();
+                //continue;
+            }
+
+            if (visitedPositions.Contains(position))
+            {
+                continue;
+            }
+
+            visitedPositions.Add(position);
+
+            if (filledPositions.Contains(position) || _allPanels.Keys.Contains(position))
+            {
+                _positionsToColor.Enqueue(position);
+                SetMat(position, curNode, _mat);
+                //continue;
+            }
+            else if (_placedWall.Keys.Contains(position))
+            {
+                _positionsToColor.Enqueue(position);
+                SetMat(position, curNode,_mat);
+                // Handle walls 
+                continue;
+            }
+            else
+            {
+                var x = Instantiate(_floodPrefab, PlacementUtils.WorldPositionToGridPosition(position+new Vector3(0,0000001f,0), _groundGrid), Quaternion.identity);
+                _allPanels.Add(position, x);
+                filledPositions.Add(position); // Add filled position to the list
+                _positionsToColor.Enqueue(position);
+                SetMat(position, curNode,_mat);
+            }
+
+
+
+            if ((curNode.wallDirections & WallDirection.Diagonal_Alpha) != 0)
+            {
+                //bool approachingTop = p.dir == Vector3.left || p.dir == Vector3.forward;
+                //thjat means you only option is to go 
+                //that means you cant go any further down or right
+                //can only go the opposite  of for or left
+
+                if (p.dir == Vector3.forward)
+                {
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.A));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.D));
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.A, _mat);
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.D, _mat);
+                    //Means A and D on panel belong to the room
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.left, Vector3.right));
+                }
+                else if (p.dir == Vector3.left)
+                {
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.A));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.D));
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.A, _mat);
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.D, _mat);
+                    //Means A and D on panel belong to the room
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.forward, Vector3.back));
+                }
+                else if (p.dir == Vector3.right)
+                {
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.B));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position , PanelFloorOwnership.C));
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.B, _mat);
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.C, _mat);
+                    //Means B and C on panel belong to the room
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.back, Vector3.forward));
+                }
+                else
+                {
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.B));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.C));
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.B, _mat);
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.C, _mat);
+                    //Means B and C on panel belong to the room
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.right, Vector3.left));
+                }
+            }
+            else if ((curNode.wallDirections & WallDirection.Diagonal_Beta) != 0)
+            {
+                if (p.dir == Vector3.forward)
+                {
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.A));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.B));
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.A, _mat);
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.B, _mat);
+                    //Means A and B on panel belong to the room
+                    //D And C now must become empty
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.right, Vector3.left));
+                }
+                else if (p.dir == Vector3.right)
+                {
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.A));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.B));
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.A, _mat);
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.B, _mat);
+                    //Means A and B on panel belong to the room
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.forward, Vector3.back));
+                }
+                else if (p.dir == Vector3.left)
+                {
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.D));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.C));
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.D, _mat);
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.C, _mat);
+                    //Means D and C on panel belong to the room
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.back, Vector3.forward));
+                }
+                else
+                {
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.D));
+                    _fragmentedPositionsToColor.Enqueue(new PositionOwnershipPair(position, PanelFloorOwnership.C));
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.D, _mat);
+                    _allPanels[position].SetMaterials(PanelFloorOwnership.C, _mat);
+                    //Means D and C on panel belong to the room
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.left, Vector3.right));
+                }
+            }
+            else
+            {
+                if ((wallDirections & WallDirection.North) == 0 && p.dir != Vector3.forward)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.forward, Vector3.back)); // Avoid going back
+                }
+
+                if ((wallDirections & WallDirection.South) == 0 && p.dir != Vector3.back)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.back, Vector3.forward)); // Avoid going forward
+                }
+
+                if ((wallDirections & WallDirection.West) == 0 && p.dir != Vector3.left)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.left, Vector3.right)); // Avoid going right
+                }
+
+                if ((wallDirections & WallDirection.East) == 0 && p.dir != Vector3.right)
+                {
+                    positionsToCheck.Enqueue(new PosDir(position + Vector3.right, Vector3.left)); // Avoid going left
+                }
+
+
+            }
+
+            //if wall directions include Wall.diagonal_alpha 
+        }
+
+        return filledPositions; // Return the list of filled positions
+    }
+     */
+    private void ChangeMat(Queue<Vector3> positionsToColor, Material mat)
+    {
+        Debug.Log("Applying Color");
+        while (positionsToColor.Count > 0)
+        {
+            Vector3 position = positionsToColor.Dequeue();
+            Node curNode = Instance.GetNodeAtPos(position);
+
+            // Apply materials to the positions in the queue
+            SetMat(position, curNode, mat);
+
+            // Handle walls or other logic specific to coloring
+            // ...
+
+            // Add the logic for enqueuing adjacent positions to _positionsToColor if needed
+            // ...
+        }
+    }
+    private void ChangeMat(Queue<PositionOwnershipPair> positionsToColor, Material mat)
+    {
+        Debug.Log("Applying Color");
+        while (positionsToColor.Count > 0)
+        {
+            PositionOwnershipPair pair = positionsToColor.Dequeue();
+            Vector3 position = pair.Position;
+            PanelFloorOwnership ownership = pair.Ownership;
+
+            //Node curNode = Instance.GetNodeAtPos(position);
+
+            // Apply materials using the ownership information
+            // For example:
+            _allPanels[position].SetMaterials(ownership, mat);
+
+            // Handle other logic as needed...
+        }
+    }
+
 
     private void SetMat(Vector3 position, Node curNode,Material mat)
     {
         if ((curNode.wallDirections & WallDirection.Diagonal_Alpha) == 0 && (curNode.wallDirections & WallDirection.Diagonal_Beta) == 0)
         {
-            allPanels[position].SetMaterials(PanelFloorOwnership.ALL, mat);
+            _allPanels[position].SetMaterials(PanelFloorOwnership.ALL, mat);
         }
     }
 
@@ -352,7 +606,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
     }
     private Material CreateTempMaterial(Color color)
     {
-        Material newMaterial = new Material(tempFloodMat);
+        Material newMaterial = new Material(_tempFloodMat);
         newMaterial.color = color;
         return newMaterial;
     }
