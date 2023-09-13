@@ -1785,14 +1785,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c4f2b21dfb600446b57adb5b1d5bdbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wallPlacementGrid: {fileID: 1639257315}
-  groundGrid: {fileID: 1046100347}
-  boundsPlane: {fileID: 2342404164155300929}
-  floodPrefab: {fileID: 8705842065051122959, guid: c2591e2da994d964e83b48e472f95215,
+  _wallPlacementGrid: {fileID: 419397015}
+  _groundGrid: {fileID: 1046100347}
+  _boundsPlane: {fileID: 669106246}
+  _floodPrefab: {fileID: 8705842065051122959, guid: c2591e2da994d964e83b48e472f95215,
     type: 3}
-  nodePrefab: {fileID: 445037858}
-  wallPositions: []
-  tempFloodMat: {fileID: 2100000, guid: eb4c675be8200994083e244a765f499f, type: 2}
+  _nodePrefab: {fileID: 445037858}
+  _wallPositions: []
+  _tempFloodMat: {fileID: 2100000, guid: eb4c675be8200994083e244a765f499f, type: 2}
 --- !u!1 &625064665
 GameObject:
   m_ObjectHideFlags: 0
@@ -1991,6 +1991,12 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9200329603180695756, guid: 2f8592bbddda58144a89423323fdc311,
     type: 3}
   m_PrefabInstance: {fileID: 1658017242}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &669106246 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5082067784121790832, guid: 9f9e0af9ee384fb41bc9b5bc7f8f4799,
+    type: 3}
+  m_PrefabInstance: {fileID: 2342404164155300925}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &684471858
 GameObject:
@@ -5182,12 +5188,6 @@ MonoBehaviour:
 --- !u!4 &2342404164155300927 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8428011416553329964, guid: 9f9e0af9ee384fb41bc9b5bc7f8f4799,
-    type: 3}
-  m_PrefabInstance: {fileID: 2342404164155300925}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &2342404164155300929 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 8428011416553329939, guid: 9f9e0af9ee384fb41bc9b5bc7f8f4799,
     type: 3}
   m_PrefabInstance: {fileID: 2342404164155300925}
   m_PrefabAsset: {fileID: 0}
