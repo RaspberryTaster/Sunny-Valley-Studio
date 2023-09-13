@@ -12,17 +12,19 @@ namespace Assets.Scripts.Building_System.Test
     {
         public List<Wall> walls = new List<Wall>(); 
         public List<Vector3> nodePositons = new List<Vector3>();
+        List<PositionOwnershipPair> _positionOwnershipPairs;
         public Vector3 position;
         public Room() { }
 
-        public Room(List<Vector3> nodePositons, List<Wall> walls)
+        public Room(List<Vector3> nodePositons, List<Wall> walls, List<PositionOwnershipPair> positionOwnershipPairs)
         {
             this.nodePositons = nodePositons;
 
-            foreach(var wall in walls)
+            foreach (var wall in walls)
             {
                 AddWall(wall);
             }
+            _positionOwnershipPairs = positionOwnershipPairs;
         }
 
         public void AddWall(Wall wall)
@@ -45,6 +47,12 @@ namespace Assets.Scripts.Building_System.Test
             {
                 position = walls.Select(w => w.transform.position).Aggregate((acc, pos) => acc + pos) / walls.Count;
             }
+        }
+
+
+        public void SetRoomFloorMat(Material m)
+        {
+            FloodFillRoom.Instance.ChangeMat(_positionOwnershipPairs, m);
         }
     }
 }

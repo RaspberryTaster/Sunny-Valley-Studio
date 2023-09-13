@@ -176,38 +176,48 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
     private void GenerateRoom(List<Vector3> filledPositions)
     {
 
-        if (filledPositions.Count == 0) return;
-        List<Vector3> nodePositions = new List<Vector3>();
-        List<Wall> encounteredWalls = new List<Wall>();
-
-
-        foreach (var position in filledPositions)
+        if (filledPositions.Count == 0)
         {
-            Node node = GetNodeAtPos(position);
-            if (node != null)
-            {
-                nodePositions.Add(position);
-            }
+            Debug.LogWarning("No filled positions available.");
+        }
+        else
+        {
+            List<Vector3> nodePositions = new List<Vector3>();
+            List<Wall> encounteredWalls = new List<Wall>();
 
-            if (_placedWall.ContainsKey(position))
+
+            foreach (var position in filledPositions)
             {
-                foreach (var wall in _placedWall[position])
+                Node node = GetNodeAtPos(position);
+                if (node != null)
                 {
-                    if (!encounteredWalls.Contains(wall))
+                    nodePositions.Add(position);
+                }
+
+                if (_placedWall.ContainsKey(position))
+                {
+                    foreach (var wall in _placedWall[position])
                     {
-                        encounteredWalls.Add(wall);
+                        if (!encounteredWalls.Contains(wall))
+                        {
+                            encounteredWalls.Add(wall);
+                        }
                     }
                 }
             }
+
+            _mat = RandomMaterialColor();
+            List<PositionOwnershipPair> positionOwnershipPairs = _positionsToColor.Select(position => new PositionOwnershipPair(position, PanelFloorOwnership.ALL)).ToList().Concat(_fragmentedPositionsToColor.ToList()).ToList();
+            Debug.Log(_fragmentedPositionsToColor.Count);
+            //ChangeMat(_positionsToColor, _mat);
+            //ChangeMat(_fragmentedPositionsToColor, _mat);
+
+
+            Room newRoom = new Room(nodePositions, encounteredWalls, positionOwnershipPairs);
+            newRoom.SetRoomFloorMat(_mat);
+            // Now you have the room data in the newRoom object, you can do further processing or use it as needed.
         }
 
-        _mat = RandomMaterialColor();
-        Debug.Log(_fragmentedPositionsToColor.Count);
-        ChangeMat(_positionsToColor, _mat);
-        ChangeMat(_fragmentedPositionsToColor, _mat);
-
-        Room newRoom = new Room(nodePositions, encounteredWalls);
-        // Now you have the room data in the newRoom object, you can do further processing or use it as needed.
     }
 
     Material _mat;
@@ -247,12 +257,14 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
             if (filledPositions.Contains(position) || _allPanels.Keys.Contains(position))
             {
                 _positionsToColor.Enqueue(position);
+                filledPositions.Add(position);
                 //SetMat(position, curNode, _mat);
                 //continue;
             }
             else if (_placedWall.Keys.Contains(position))
             {
                 _positionsToColor.Enqueue(position);
+                filledPositions.Add(position);
                 //SetMat(position, curNode,_mat);
                 // Handle walls 
                 continue;
@@ -553,7 +565,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
         return filledPositions; // Return the list of filled positions
     }
      */
-    private void ChangeMat(Queue<Vector3> positionsToColor, Material mat)
+    public void ChangeMat(Queue<Vector3> positionsToColor, Material mat)
     {
         Debug.Log("Applying Color");
         while (positionsToColor.Count > 0)
@@ -571,7 +583,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
             // ...
         }
     }
-    private void ChangeMat(Queue<PositionOwnershipPair> positionsToColor, Material mat)
+    public void ChangeMat(Queue<PositionOwnershipPair> positionsToColor, Material mat)
     {
         Debug.Log("Applying Color");
         while (positionsToColor.Count > 0)
@@ -590,6 +602,26 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
         }
     }
 
+
+    public void ChangeMat(List<PositionOwnershipPair> p, Material mat)
+    {
+        Queue<PositionOwnershipPair> positionsToColor = new Queue<PositionOwnershipPair>(p);
+        Debug.Log("Applying Color");
+        while (positionsToColor.Count > 0)
+        {
+            PositionOwnershipPair pair = positionsToColor.Dequeue();
+            Vector3 position = pair.Position;
+            PanelFloorOwnership ownership = pair.Ownership;
+
+            //Node curNode = Instance.GetNodeAtPos(position);
+
+            // Apply materials using the ownership information
+            // For example:
+            _allPanels[position].SetMaterials(ownership, mat);
+
+            // Handle other logic as needed...
+        }
+    }
 
     private void SetMat(Vector3 position, Node curNode,Material mat)
     {
