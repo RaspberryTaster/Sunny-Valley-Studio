@@ -111,6 +111,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
     }
     public void AddWall(Wall w)
     {
+        if (w == null) return;
         Vector3 key = Position(w.transform.position);
         Vector3 key1 = Position(w.endPoint.position);
         _wallPositions.Add(key);
@@ -132,6 +133,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
     public void RemoveWall(Wall w)
     {
+        if (w == null) return;
         Vector3 key = Position(w.transform.position);
         Vector3 key1 = Position(w.endPoint.position);
         _wallPositions.Remove(key);
@@ -165,7 +167,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
         return withinXBounds && withinZBounds;
     }
 
-    private void BeginRoomGeneration(Vector3 position)
+    public void BeginRoomGeneration(Vector3 position)
     {
 
         //if (!IsWithinBoundsXZ(position)) return;
@@ -254,12 +256,17 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
             visitedPositions.Add(position);
 
-            if (filledPositions.Contains(position) || _allPanels.Keys.Contains(position))
+            if (filledPositions.Contains(position))
             {
                 _positionsToColor.Enqueue(position);
                 filledPositions.Add(position);
                 //SetMat(position, curNode, _mat);
                 //continue;
+            }
+            else if (_allPanels.Keys.Contains(position))
+            {
+                _positionsToColor.Enqueue(position);
+                filledPositions.Add(position);
             }
             else if (_placedWall.Keys.Contains(position))
             {

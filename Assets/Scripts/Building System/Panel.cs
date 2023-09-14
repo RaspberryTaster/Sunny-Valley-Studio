@@ -27,15 +27,18 @@ namespace Assets.Scripts.Building_System
         private void Awake()
         {
             rend = GetComponent<Renderer>();
+            rend.enabled = false;
         }
 
         [Button]
         public void SetTest()
         {
+
             SetMaterials(A,tempMaterial);
         }
         public void SetMaterials(PanelFloorOwnership ownership, Material mat)
         {
+            rend.enabled = true;
             if ((ownership & PanelFloorOwnership.A) != 0)
             {
                 SetMatA(mat);

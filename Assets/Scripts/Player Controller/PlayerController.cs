@@ -8,6 +8,17 @@ public class PlayerController : Singleton<PlayerController>
     public Tilemap objectPlacementGrid;
     public Tilemap wallGrid;
     public GameObject mouseIndicator;
+
+    public IPlayerState _wallPlacementState;
+    public IPlayerState _nullPlayerState;
+    public IPlayerState _objectPlacementState; 
+    private void Awake()
+    {
+        _wallPlacementState = new WallPlacementState(wallGrid, mouseIndicator);
+        _nullPlayerState = new NullPlayerState();
+        _objectPlacementState = new ObjectPlacementState(objectPlacementGrid, mouseIndicator);
+
+    }
     public void SetState(IPlayerState state)
     {
         currentState = state;
@@ -31,15 +42,15 @@ public class PlayerController : Singleton<PlayerController>
 
     public void SetWallPlacementState()
     {
-        SetState(new WallPlacementState(wallGrid, mouseIndicator));
+        SetState(_wallPlacementState);
     }
     public void SetNullState()
     {
-        SetState(new NullPlayerState());
+        SetState(_nullPlayerState);
     }
     public void SetObjectPlacementState()
     {
-        SetState(new ObjectPlacementState(objectPlacementGrid, mouseIndicator));
+        SetState(_objectPlacementState);
     }
 
     public void SetObjectPlacementState(PlaceableObject placeableObject)

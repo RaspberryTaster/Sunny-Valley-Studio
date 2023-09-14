@@ -72,6 +72,9 @@ public class Wall : MonoBehaviour, ICollidable
         {
             InformNeighbour(FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position + wallObject.transform.forward / 2));
             InformNeighbour(FloodFillRoom.Instance.GetNodeAtPos(wallObject.transform.position + -wallObject.transform.forward / 2));
+
+            FloodFillRoom.Instance.BeginRoomGeneration(wallObject.transform.position + -wallObject.transform.forward / 2);
+            FloodFillRoom.Instance.BeginRoomGeneration(wallObject.transform.position + wallObject.transform.forward / 2);
         }
     }
 
