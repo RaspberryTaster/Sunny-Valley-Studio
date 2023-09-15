@@ -263,12 +263,12 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
                 //SetMat(position, curNode, _mat);
                 //continue;
             }
-            else if (_allPanels.Keys.Contains(position))
+            else if (_allPanels.ContainsKey(position))
             {
                 _positionsToColor.Enqueue(position);
                 filledPositions.Add(position);
             }
-            else if (_placedWall.Keys.Contains(position))
+            else if (_placedWall.ContainsKey(position))
             {
                 _positionsToColor.Enqueue(position);
                 filledPositions.Add(position);
@@ -276,7 +276,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
                 // Handle walls 
                 continue;
             }
-            else
+            else if(!_allPanels.ContainsKey(position))
             {
                 var x = Instantiate(_floodPrefab, PlacementUtils.WorldPositionToGridPosition(position+new Vector3(0,0000001f,0), _groundGrid), Quaternion.identity);
                 _allPanels.Add(position, x);
