@@ -1,6 +1,7 @@
 using Assets.Scripts.Building_System;
 using Assets.Scripts.Building_System.Test;
 using Assets.Scripts.Extensions;
+using NaughtyAttributes;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,13 +45,21 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
     private Dictionary<Vector3, List<Wall>> _placedWall = new Dictionary<Vector3, List<Wall>>();
     private Dictionary<Vector3, Node> _nodes = new Dictionary<Vector3, Node>();
 
-    public Dictionary<Vector3, Panel> _allPanels = new();
+    //public Dictionary<Vector3, Panel> _allPanels = new();
     public Material _tempFloodMat;
+
+    public PanelGridGenerator _panelGrid;
+
+    private void Awake()
+    {
+        _panelGrid = GetComponent<PanelGridGenerator>();
+    }
     private void Start()
     {
         _mainCamera = Camera.main;
+        _panelGrid.GeneratePanelGrid();
     }
-
+    Panel testPanel = null;
     private void Update()
     {
         if (Input.GetMouseButtonDown(1))
@@ -60,6 +69,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 Vector3 placementPosition = PlacementUtils.WorldPositionToGridPosition(hit.point, _groundGrid);
+
 
                 Debug.Log("Flood");
                 // Check if placement position is within bounds
@@ -77,18 +87,23 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                Vector3 placementPosition = Position(hit.point);
-
-                // Check if placement position is within bounds
-                if (IsWithinBoundsXZ(placementPosition))
-                {
-                    BeginRoomGeneration(placementPosition);
-                }
+                //Vector3 placementPosition = Position(hit.point);
+                testPanel = _panelGrid.PanelFromWorldPoint(hit.point);
+                Debug.Log(testPanel.name);
             }
 
         }
+
     }
 
+
+    [Button]
+    public void SetPanelGrid()
+    {
+        Bounds bounds = _boundsPlane.bounds;
+
+        _panelGrid.GeneratePanelGrid(new Vector2Int((int)bounds.size.x , (int)bounds.size.z));
+    }
 
     public Node GetNodeAtPos(Vector3 position)
     {
@@ -256,6 +271,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
             visitedPositions.Add(position);
 
+            Panel samplePanel = _panelGrid.PanelFromWorldPoint(position);
             if (filledPositions.Contains(position))
             {
                 _positionsToColor.Enqueue(position);
@@ -263,7 +279,7 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
                 //SetMat(position, curNode, _mat);
                 //continue;
             }
-            else if (_allPanels.ContainsKey(position))
+            else if (samplePanel != null)
             {
                 _positionsToColor.Enqueue(position);
                 filledPositions.Add(position);
@@ -276,15 +292,16 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
                 // Handle walls 
                 continue;
             }
-            else if(!_allPanels.ContainsKey(position))
+            /*
+            else
             {
-                var x = Instantiate(_floodPrefab, PlacementUtils.WorldPositionToGridPosition(position+new Vector3(0,0000001f,0), _groundGrid), Quaternion.identity);
-                _allPanels.Add(position, x);
+                //var x = Instantiate(_floodPrefab, PlacementUtils.WorldPositionToGridPosition(position+new Vector3(0,0000001f,0), _groundGrid), Quaternion.identity);
+                //_allPanels.Add(position, x);
                 filledPositions.Add(position); // Add filled position to the list
                 _positionsToColor.Enqueue(position);
                 //SetMat(position, curNode,_mat);
             }
-
+            */
 
 
             if ((curNode.wallDirections & WallDirection.Diagonal_Alpha) != 0)
@@ -603,7 +620,10 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
             // Apply materials using the ownership information
             // For example:
-            _allPanels[position].SetMaterials(ownership, mat);
+
+            Panel samplePanel = _panelGrid.PanelFromWorldPoint(position);
+            samplePanel.SetMaterials(ownership, mat);
+            //_allPanels[position].SetMaterials(ownership, mat);
 
             // Handle other logic as needed...
         }
@@ -624,7 +644,9 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
 
             // Apply materials using the ownership information
             // For example:
-            _allPanels[position].SetMaterials(ownership, mat);
+            Panel samplePanel = _panelGrid.PanelFromWorldPoint(position);
+            samplePanel.SetMaterials(ownership, mat);
+            //_allPanels[position].SetMaterials(ownership, mat);
 
             // Handle other logic as needed...
         }
@@ -634,7 +656,8 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
     {
         if ((curNode.wallDirections & WallDirection.Diagonal_Alpha) == 0 && (curNode.wallDirections & WallDirection.Diagonal_Beta) == 0)
         {
-            _allPanels[position].SetMaterials(PanelFloorOwnership.ALL, mat);
+            Panel samplePanel = _panelGrid.PanelFromWorldPoint(position);
+            samplePanel.SetMaterials(PanelFloorOwnership.ALL, mat);
         }
     }
 
@@ -648,5 +671,12 @@ public class FloodFillRoom : Singleton<FloodFillRoom>
         Material newMaterial = new Material(_tempFloodMat);
         newMaterial.color = color;
         return newMaterial;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if(testPanel == null) { return; }
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawSphere(testPanel.transform.position, 1);
     }
 }
